@@ -14,12 +14,28 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\SerializerInterface;
+use Nelmio\ApiDocBundle\Annotation\Model;
+use Nelmio\ApiDocBundle\Annotation\Security;
+use OpenApi\Annotations as OA;
 
+#[Route('/api/person')]
 class PersonController extends AbstractController
 {
-    #[Route('/person/list', name: 'api_person_list', methods:['GET'])]
+
+    /**
+     * List the persons order by name.
+     *
+     *
+     * @OA\Response(
+     *     response=200,
+     *     @OA\JsonContent(
+     *        type="array",
+     *        @OA\Items(ref=@Model(type=Person::class, groups={"getPerson"}))
+     *     )
+     * )
+     */
+    #[Route('/list', name: 'api_person_list', methods:['GET'])]
     public function getPersonList(PersonRepository $personRepository): JsonResponse
     {
         $personList  = $personRepository->findAllOrderByName();
@@ -29,7 +45,20 @@ class PersonController extends AbstractController
         ,  Response::HTTP_OK,[],  ['groups' => 'getPerson']);
     }
 
-    #[Route('/person/list/{companyName}', name: 'api_person_list_by_company_name', methods:['GET'])]
+
+    /**
+     * List the persons that have work in the same company.
+     *
+     *
+     * @OA\Response(
+     *     response=200,
+     *     @OA\JsonContent(
+     *        type="array",
+     *        @OA\Items(ref=@Model(type=Person::class, groups={"getPerson"}))
+     *     )
+     * )
+     */
+    #[Route('/list/{companyName}', name: 'api_person_list_by_company_name', methods:['GET'])]
     public function getListByCompanyName(
         string $companyName, 
         PersonRepository $personRepository
@@ -44,7 +73,19 @@ class PersonController extends AbstractController
         
     }
 
-    #[Route('/person/add', name: 'api_person_add', methods:['POST'])]
+    /**
+     * Add a person.
+     *
+     *
+     * @OA\Response(
+     *     response=200,
+     *     description="Returns the person",
+     *     @OA\JsonContent(
+     *        type=Person::class, groups={"getPerson"},
+     *     )
+     * )
+     */
+    #[Route('/add', name: 'api_person_add', methods:['POST'])]
     public function add(Request $request, SerializerInterface $serializer, EntityManagerInterface $em
     ): JsonResponse 
     {
@@ -69,7 +110,7 @@ class PersonController extends AbstractController
         ,  Response::HTTP_OK,[],  ['groups' => 'getPerson']);
     }
 
-    #[Route('/person/{id}/job/add', name:'api_job_add', methods: ['POST'])]
+    #[Route('/{id}/job/add', name:'api_job_add', methods: ['POST'])]
     public function addJob(Person $person,Request $request, SerializerInterface $serializer, EntityManagerInterface $em
     ): JsonResponse{
 
@@ -88,7 +129,7 @@ class PersonController extends AbstractController
         ,  Response::HTTP_OK,[],  ['groups' => 'getPerson']);
     }
 
-    #[Route('/person/{id}/job/between/{start}/{finish}', name: 'api_person_job_between_date', methods:['GET'])]
+    #[Route('/{id}/job/between/{start}/{finish}', name: 'api_person_job_between_date', methods:['GET'])]
     public function getListBetweenDate(
         Person $person,
         DateTime $start, 
