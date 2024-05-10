@@ -16,7 +16,6 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 use Nelmio\ApiDocBundle\Annotation\Model;
-use Nelmio\ApiDocBundle\Annotation\Security;
 use OpenApi\Annotations as OA;
 
 #[Route('/api/person')]
@@ -81,7 +80,7 @@ class PersonController extends AbstractController
      *     response=200,
      *     description="Returns the person",
      *     @OA\JsonContent(
-     *        type=Person::class, groups={"getPerson"},
+     *        @Model=Person::class, groups={"getPerson"},
      *     )
      * )
      */
@@ -110,6 +109,18 @@ class PersonController extends AbstractController
         ,  Response::HTTP_OK,[],  ['groups' => 'getPerson']);
     }
 
+    /**
+     * Add a job to a person.
+     *
+     *
+     * @OA\Response(
+     *     response=200,
+     *     description="Returns the person",
+     *     @OA\JsonContent(
+     *        @Model=Person::class, groups={"getPerson"},
+     *     )
+     * )
+     */
     #[Route('/{id}/job/add', name:'api_job_add', methods: ['POST'])]
     public function addJob(Person $person,Request $request, SerializerInterface $serializer, EntityManagerInterface $em
     ): JsonResponse{
@@ -129,6 +140,17 @@ class PersonController extends AbstractController
         ,  Response::HTTP_OK,[],  ['groups' => 'getPerson']);
     }
 
+    /**
+     * List a person job between 2 date
+     *
+     *
+     * @OA\Response(
+     *     response=200,
+     *     @OA\JsonContent(
+     *        @Model=Job::class, groups={"getPerson"},
+     *     )
+     * )
+     */
     #[Route('/{id}/job/between/{start}/{finish}', name: 'api_person_job_between_date', methods:['GET'])]
     public function getListBetweenDate(
         Person $person,
@@ -137,8 +159,12 @@ class PersonController extends AbstractController
         JobRepository $jobRepository
     ): JsonResponse
     {
-        $personList  = $jobRepository->findByJobBetweenDate($person, $start, $finish);
 
+        $personList  = $jobRepository->findByJobBetweenDate($person, $start, $finish);
+        if( ($finish && $finish < $start )
+         || $start > new DateTime() ){
+            throw new BadRequestHttpException('Incorrect date');
+        }
         return $this->json(
             $personList
         ,  Response::HTTP_OK,[],  ['groups' => 'getPerson']);
