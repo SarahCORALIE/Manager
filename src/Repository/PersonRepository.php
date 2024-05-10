@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\Job;
 use App\Entity\Person;
+use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -36,22 +37,5 @@ class PersonRepository extends ServiceEntityRepository
         ->getResult();
 
     }
-
-    public function findByJobBetweenDate(string $startDate, string $endDate): array {      
-        $q = $this->createQueryBuilder('person');
-        return $q
-        ->leftJoin("person.jobs",'job')
-        ->where(
-            $q->expr()->orX(
-            $q->expr()->between('job.startedAt', ':startDate', ':endDate'),
-            $q->expr()->between('job.startedAt', ':startDate', ':endDate')
-            )
-        )
-        ->setParameter(':startDate', $startDate)
-        ->setParameter(':endDate', $endDate)
-        ->orderBy('person.name', 'ASC')
-        ->getQuery()
-        ->getResult();
-     }
 
 }

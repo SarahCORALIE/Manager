@@ -3,6 +3,8 @@
 namespace App\Repository;
 
 use App\Entity\Job;
+use App\Entity\Person;
+use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -16,28 +18,28 @@ class JobRepository extends ServiceEntityRepository
         parent::__construct($registry, Job::class);
     }
 
-    //    /**
-    //     * @return Job[] Returns an array of Job objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('j')
-    //            ->andWhere('j.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('j.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
 
-    //    public function findOneBySomeField($value): ?Job
-    //    {
-    //        return $this->createQueryBuilder('j')
-    //            ->andWhere('j.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+    public function findByJobBetweenDate(Person $person, DateTime $startDate, ?DateTime $endDate): array {      
+        
+        if (!$endDate){
+            $endDate= new DateTime();
+        }
+
+        $q = $this->createQueryBuilder('job');
+        return $q
+        ->leftJoin("job.person",'person')
+        ->andWhere('person.id = :personId')
+        ->andWhere(
+            $q->expr()->orX(
+            $q->expr()->between('job.startedAt', ':startDate', ':endDate'),
+            $q->expr()->between('job.stopedAt', ':startDate', ':endDate')
+            )
+        )
+        ->setParameter(':personId', $person->getId())
+        ->setParameter(':startDate', $startDate)
+        ->setParameter(':endDate', $endDate)
+        ->getQuery()
+        ->getResult();
+    }
+
 }
