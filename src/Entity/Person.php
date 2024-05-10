@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\PersonRepository;
+use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
@@ -110,5 +111,10 @@ class Person
         }
 
         return $this;
+    }
+
+    #[Groups(["getPerson"])]
+    public function getAge(): int{
+        return $age = (new DateTime())->diff($this->getBirthdate())->y;
     }
 }
