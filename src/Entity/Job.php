@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\JobRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: JobRepository::class)]
 class Job
@@ -11,21 +12,26 @@ class Job
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(["getPerson"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(["getPerson"])]
     private ?string $companyName = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(["getPerson"])]
     private ?string $position = null;
 
     #[ORM\ManyToOne(inversedBy: 'jobs')]
     private ?Person $person = null;
 
     #[ORM\Column]
+    #[Groups(["getPerson"])]
     private ?\DateTimeImmutable $startedAt = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(["getPerson"])]
     private ?\DateTimeImmutable $stopedAt = null;
 
     public function getId(): ?int

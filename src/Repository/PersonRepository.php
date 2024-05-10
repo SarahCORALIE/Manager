@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Entity\Job;
 use App\Entity\Person;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -16,28 +17,41 @@ class PersonRepository extends ServiceEntityRepository
         parent::__construct($registry, Person::class);
     }
 
-    //    /**
-    //     * @return Person[] Returns an array of Person objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('p')
-    //            ->andWhere('p.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('p.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    public function findAllOrderByName(): array{
+        return $this->createQueryBuilder('person')
+        ->leftJoin("person.jobs",'job')
+        ->orderBy('person.name', 'ASC')
+        ->getQuery()
+        ->getResult()
+    ;
+    }
 
-    //    public function findOneBySomeField($value): ?Person
-    //    {
-    //        return $this->createQueryBuilder('p')
-    //            ->andWhere('p.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+    public function findByCompanyName(string $companyName): array {
+        return $this->createQueryBuilder('person')
+        ->leftJoin("person.jobs",'job')
+        ->where('job.companyName = :companyName')
+        ->setParameter(':companyName', $companyName)
+        ->orderBy('person.name', 'ASC')
+        ->getQuery()
+        ->getResult();
+
+    }
+
+    public function findByJobBetweenDate(string $startDate, string $endDate): array {      
+        $q = $this->createQueryBuilder('person');
+        return $q
+        ->leftJoin("person.jobs",'job')
+        ->where(
+            $q->expr()->orX(
+            $q->expr()->between('job.startedAt', ':startDate', ':endDate'),
+            $q->expr()->between('job.startedAt', ':startDate', ':endDate')
+            )
+        )
+        ->setParameter(':startDate', $startDate)
+        ->setParameter(':endDate', $endDate)
+        ->orderBy('person.name', 'ASC')
+        ->getQuery()
+        ->getResult();
+     }
+
 }
