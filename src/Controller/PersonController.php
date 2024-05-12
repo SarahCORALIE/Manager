@@ -106,7 +106,7 @@ class PersonController extends AbstractController
         
         return $this->json(
             $person
-        ,  Response::HTTP_OK,[],  ['groups' => 'getPerson']);
+        ,  Response::HTTP_CREATED,[],  ['groups' => 'getPerson']);
     }
 
     /**
@@ -137,7 +137,7 @@ class PersonController extends AbstractController
 
         return $this->json(
             $person
-        ,  Response::HTTP_OK,[],  ['groups' => 'getPerson']);
+        ,  Response::HTTP_CREATED,[],  ['groups' => 'getPerson']);
     }
 
     /**
@@ -162,7 +162,7 @@ class PersonController extends AbstractController
 
         $personList  = $jobRepository->findByJobBetweenDate($person, $start, $finish);
         if( ($finish && $finish < $start )
-         || $start > new DateTime() ){
+            || $start > new DateTime() ){
             throw new BadRequestHttpException('Incorrect date');
         }
         return $this->json(
